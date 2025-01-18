@@ -1,3 +1,7 @@
+[rhel]
 alma8
 rocky8
+
+[debian]
+ubuntu22
 ubuntu24
