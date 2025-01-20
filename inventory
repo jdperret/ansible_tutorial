@@ -1,9 +1,9 @@
 [web_servers]
 ubuntu22
-alma8
+alma8-1
 
 [db_servers]
 ubuntu24
 
 [file_servers]
-rocky8
+alma8-2

@@ -4,12 +4,12 @@
   become: true
   pre_tasks:
 
-  - name: install updates (Alma/Rocky)
+  - name: install updates (AlmaLinux)
     tags: always
     dnf:
       update_only: yes
       update_cache: yes
-    when: ansible_distribution == 'Alma' or ansible_distribution == 'Rocky'
+    when: ansible_distribution == 'AlmaLinux'
 
   - name: install updates (Ubuntu)
     tags: always
@@ -32,14 +32,23 @@
       state: latest
     when: ansible_distribution == 'Ubuntu'
 
-  - name: install apache & php packages for Alma/Rocky
+  - name: install apache & php packages for AlmaLinux)
     tags: apache,https,alma,rocky
     dnf:
       name: 
         - httpd
         - php
       state: latest
-    when: ansible_distribution == 'Alma' or ansible_distribution == 'Rocky'
+    when: ansible_distribution == 'AlmaLinux'
+
+  - name: copy default html file for site
+    tags: apache,apahe2,htppd
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
 
 - hosts: db_servers
   become: true
@@ -52,12 +61,12 @@
       state: latest
     when: ansible_distribution == 'Ubuntu'
 
-  - name: install mariadb package (Alma/Rocky)
+  - name: install mariadb package (AlmaLinux)
     tags: mariadb, db,alma,rocky
     dnf:
       name: mariadb
       state: latest
-    when: ansible_distribution == 'Alma' or ansible_distribution == 'Rocky'
+    when: ansible_distribution == 'AlmaLinux'
 
 - hosts: file_servers
   become: true
