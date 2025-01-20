@@ -1,9 +1,12 @@
 [web_servers]
 ubuntu22
-alma8-1
+almalinux8
 
 [db_servers]
 ubuntu24
 
 [file_servers]
-alma8-2
+rockylinux8
+
+[workstations]
+192.168.254.105
