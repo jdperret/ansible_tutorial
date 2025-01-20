@@ -4,36 +4,21 @@
   become: true
   tasks:
 
-  - name: update repository index
+
+  - name: install apache & php packages for
     apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+      state: latest
       update_cache: yes
-    when: ansible_os_family == "Debian"
+    when: ansible_distribution == 'Ubuntu'
 
-  - name: install apache2 package
-    apt:
-      name: apache2
-      state: latest
-    when: ansible_os_family == "Debian"
-
-  - name: install php support for apache
-    apt:
-      name: libapache2-mod-php
-      state: latest
-    when: ansible_os_family == "Debian"
-
-  - name: update repository index
+  - name: install apache & php packages for Alma/Rocky
     dnf:
+      name: 
+        - httpd
+        - php
+      state: latest
       update_cache: yes
-    when: ansible_os_family == "RedHat"
-
-  - name: install apache httpd package
-    dnf:
-      name: httpd
-      state: latest
-    when: ansible_os_family == "RedHat"
-
-  - name: install php support for apache httpd
-    dnf:
-      name: php
-      state: latest
-    when: ansible_os_family == "RedHat"
+    when: ansible_distribution == 'Alma' or ansible_distribution == 'Rocky'

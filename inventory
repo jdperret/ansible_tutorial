@@ -1,7 +1,9 @@
-[rhel]
-alma8
-rocky8
-
-[debian]
+[web_servers]
 ubuntu22
+alma8
+
+[db_servers]
 ubuntu24
+
+[file_servers]
+rocky8
