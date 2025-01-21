@@ -1,0 +1,49 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (AlmaLinux & RockyLinux)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == 'AlmaLinux' or ansible_distribution == 'Rocky'
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == 'Ubuntu'
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create simone user
+    tags: always
+    user:
+      name: simone
+      groups: users
+    when: ansible_distribution_version != '9.5'
+
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGpe7IV/4Bot37uKDfYnU+0XmMKo94PEnmNAeTSwTSTY ansible"
+    when: ansible_distribution_version != '9.5'
+
+  - name: add sudoers file for simone
+    tags: always
+    copy:
+      src: sudoer_simone
+      dest: /etc/sudoers.d/simon
+      owner: root
+      group: root
+      mode: 0440
+    when: ansible_distribution_version != '9.5'
