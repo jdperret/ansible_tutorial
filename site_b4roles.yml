@@ -1,0 +1,135 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: update repo cache (AlmaLinux & RockyLinux)
+    tags: always
+    dnf:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == 'AlmaLinux' or ansible_distribution == 'Rocky'
+
+  - name: update repo cache (Ubuntu)
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == 'Ubuntu'
+
+
+- hosts: all
+  become: true
+  tasks:
+
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGpe7IV/4Bot37uKDfYnU+0XmMKo94PEnmNAeTSwTSTY ansible"
+    when: ansible_distribution_version != '9.5'
+
+
+- hosts: workstations
+  become: true
+  tasks:
+
+  - name: install unzip
+    package:
+      name: unzip
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/1.10.4/terraform_1.10.4_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache & php packages for Ubuntu
+    tags: apache,apache2,ubuntu
+    apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when: ansible_distribution == 'Ubuntu'
+
+  - name: install apache & php packages for AlmaLinux & RockyLinux
+    tags: apache,httpd,AlmaLinux,Rocky
+    dnf:
+      name: 
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == 'AlmaLinux' or ansible_distribution == 'Rocky'
+
+  - name: change e-mail address for admin
+    tags: apache,httpd,AlmaLinux,Rocky
+    lineinfile: 
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net 
+    when: ansible_distribution == 'AlmaLinux' or ansible_distribution == 'Rocky'
+    register: httpd
+
+  - name: restart httpd for AltaLinux & RockLinux
+    tags: apache,httpd,AlmaLinux,Rocky
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
+
+  - name: copy default html file for site
+    tags: apache,apahe2,httpd
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: start httpd (AlmaLinux & Rocky)
+    tags: apache,apahe2,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == 'AlmaLinux' or ansible_distribution == 'Rocky'
+    
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: install mariadb package (Ubuntu)
+    tags: mariadb,db,ubuntu
+    apt:
+      name:  mariadb-server
+      state: latest
+    when: ansible_distribution == 'Ubuntu'
+
+  - name: install mariadb package (AlmaLinux & RockyLinux)
+    tags: mariadb, db,AlmaLinux,Rocky
+    dnf:
+      name: mariadb
+      state: latest
+    when: ansible_distribution == 'AlmaLinux' or ansible_distribution == 'Rocky'
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: install samba package
+    tags: samba
+    package:
+      name: samba
+      state: latest
+
